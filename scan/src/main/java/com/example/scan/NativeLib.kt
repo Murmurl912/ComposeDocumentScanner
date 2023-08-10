@@ -1,16 +1,15 @@
 package com.example.scan
 
+import android.graphics.Bitmap
+import java.nio.ByteBuffer
+
 object NativeLib {
 
     init {
         System.loadLibrary("scan")
     }
 
-    /**
-     * A native method that is implemented by the 'scan' native library,
-     * which is packaged with this application.
-     */
-    external fun stringFromJNI(): String
 
+    external fun decode(width: Int, height: Int, buffer: ByteBuffer): Bitmap
 
 }

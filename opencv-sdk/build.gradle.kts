@@ -40,7 +40,8 @@ android {
     }
     sourceSets {
         getByName("main") {
-            java.srcDir("java")
+            java.srcDir("java/src")
+            res.srcDir("java/res")
             manifest.srcFile("java/AndroidManifest.xml")
             jniLibs.srcDir("native/libs")
         }
