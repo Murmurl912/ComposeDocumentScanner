@@ -16,7 +16,7 @@ set(OPENCV_3RD_LIB_DIR ${OPENCV_BASE_DIR}/3rdparty/libs/${ANDROID_ABI}/)
 
 include_directories(
         ${OPENCV_BASE_DIR}/include
-        ${SRC_DIR}/include)
+        src/main/cpp/include)
 
 
 link_directories(${OPENCV_LIB_DIR}
