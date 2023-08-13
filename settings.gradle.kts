@@ -1,6 +1,7 @@
 pluginManagement {
     repositories {
         google()
+        mavenCentral()
         gradlePluginPortal()
     }
 }
@@ -14,5 +15,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "ComposeDocumentScanner"
 include(":app")
-include(":opencv-sdk")
+//include(":opencv-sdk")
 include(":scan")

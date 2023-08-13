@@ -1,8 +1,6 @@
-import com.android.build.api.dsl.Packaging
-import org.jetbrains.kotlin.cli.jvm.main
-
 plugins {
     id("com.android.library")
+    id("org.jetbrains.kotlin.android")
 }
 
 
@@ -29,8 +27,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     packaging {
@@ -44,6 +42,7 @@ android {
             res.srcDir("java/res")
             manifest.srcFile("java/AndroidManifest.xml")
             jniLibs.srcDir("native/libs")
+            aidl.srcDir("java/src")
         }
     }
     externalNativeBuild {
