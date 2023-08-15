@@ -1,9 +1,13 @@
 package com.example.composedocumentscanner.camera
 
 import androidx.camera.core.CameraControl
+import androidx.compose.animation.core.DecayAnimationSpec
+import androidx.compose.animation.core.calculateTargetValue
+import androidx.compose.animation.splineBasedDecay
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.snapping.SnapLayoutInfoProvider
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
@@ -20,14 +24,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyListItemInfo
+import androidx.compose.foundation.lazy.LazyListLayoutInfo
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
+import androidx.compose.foundation.pager.PagerDefaults
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.ArrowLeft
 import androidx.compose.material.icons.filled.ArrowRight
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.AspectRatio
 import androidx.compose.material.icons.filled.AutoAwesomeMotion
 import androidx.compose.material.icons.filled.AutoMode
@@ -39,15 +49,19 @@ import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.outlined.AutoAwesomeMotion
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -63,6 +77,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import kotlin.math.absoluteValue
+import kotlin.math.sign
 
 
 @Composable
@@ -135,78 +151,132 @@ fun ScanControl(
 @Preview
 @Composable
 fun FlashControl(modifier: Modifier = Modifier) {
-    val state = rememberLazyListState()
-    val flingBehavior = rememberSnapFlingBehavior(SnapLayoutInfoProvider(
-        state,
-        positionInLayout = {
-                layoutSize, itemSize ->
-            println("layout size: $layoutSize $itemSize")
-            (layoutSize / 2f - itemSize / 2F)
-        }
-    ))
     Column(modifier) {
         Box(Modifier.fillMaxWidth(1F)) {
-            Icon(Icons.Default.Clear, contentDescription = "close",
-                Modifier
-                    .padding(5.dp)
-                    .align(Alignment.CenterStart)
-                    .size(14.dp))
+            IconButton(onClick = { /*TODO*/ }) {
+                Icon(Icons.Default.Clear, contentDescription = "close", modifier = Modifier.padding(10.dp))
+            }
             Text(text = "Auto", Modifier.align(Alignment.Center))
         }
-        Row(Modifier.fillMaxWidth(1F)) {
-            Icon(Icons.Default.ArrowLeft, contentDescription = "close", Modifier.align(Alignment.CenterVertically))
-            BoxWithConstraints(
-                Modifier
-                    .wrapContentHeight()
-                    .weight(1F)
-                    .onSizeChanged {
-
-                    }) {
-                var size by remember {
-                    mutableStateOf(IntSize.Zero)
-                }
-                LazyRow(
-                    modifier = Modifier.onSizeChanged {
-                        size = it
-                    },
-                    state = state,
-                    flingBehavior = flingBehavior) {
-                    item {
-                        Layout(
-                            content = {
-                                // Here's the content of each list item.
-                                Text(text = ("Item 1"), Modifier.padding(12.dp))
-                            },
-                            measurePolicy = { measurables, constraints ->
-                                // I'm assuming you'll declaring just one root
-                                // composable in the content function above
-                                // so it's measuring just the Box
-                                val placeable = measurables.first().measure(constraints)
-                                // maxWidth is from the BoxWithConstraints
-                                val maxWidthInPx = maxWidth.roundToPx()
-                                // Box width
-                                val itemWidth = placeable.width
-                                // Calculating the space for the first and last item
-                                val startSpace = (maxWidthInPx - itemWidth) / 2
-                                val endSpace = 0
-                                // The width of the box + extra space
-                                val width = startSpace + placeable.width + endSpace
-                                layout(width, placeable.height) {
-                                    // Placing the Box in the right X position
-                                    val x = startSpace
-                                    placeable.place(x, 0)
-                                }
-                            }
-                        )
-                    }
-                    items(10) {
-                        Text(text = ("Item $it"), Modifier.padding(12.dp))
-                    }
-                }
+        Row(Modifier.fillMaxWidth(1F), verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = { /*TODO*/ }) {
+                Icon(Icons.Default.ArrowLeft, contentDescription = "close")
             }
 
-            Icon(Icons.Default.ArrowRight, contentDescription = "close", Modifier.align(Alignment.CenterVertically))
+            IconButton(onClick = { /*TODO*/ }) {
+                Icon(Icons.Default.ArrowRight, contentDescription = "close")
+            }
         }
     }
+
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Preview
+@Composable
+fun CenterAlignLazyRow() {
+    val listState = rememberLazyListState()
+
+    val snapFlingBehavior = rememberSnapFlingBehavior((
+        listState
+    ))
+    var lazyRowSize by remember {
+        mutableStateOf(IntSize.Zero)
+    }
+    var firstItemSize by remember {
+        mutableStateOf(IntSize.Zero)
+    }
+    var lastItemSize by remember {
+        mutableStateOf(IntSize.Zero)
+    }
+    val density = LocalDensity.current
+    val contentPadding by remember(density) {
+        derivedStateOf {
+            with(density) {
+                val startPadding = ((lazyRowSize.width - firstItemSize.width) / 2F).coerceAtLeast(0F).toDp()
+                val endPadding =
+                    if (lastItemSize == IntSize.Zero) {
+                        startPadding
+                    } else {
+                        ((lazyRowSize.width - lastItemSize.width) / 2F).coerceAtLeast(0F).toDp()
+                    }
+
+                PaddingValues(
+                    start =  startPadding,
+                    end = endPadding
+                )
+            }
+
+        }
+    }
+    println("contentPadding = $contentPadding")
+    println("first item size: $firstItemSize")
+    println("last item size: $lastItemSize")
+    println("lazy row size: $lazyRowSize")
+
+    LazyRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .onSizeChanged {
+                lazyRowSize = it
+            }.drawBehind {
+                         drawLine(Color.Black,
+                             start = Offset(size.width / 2F - 2F, 0F),
+                             end = Offset(size.width / 2F - 2F, size.height),
+                             strokeWidth = 4F)
+            },
+        state = listState,
+        contentPadding = contentPadding,
+        horizontalArrangement = Arrangement.Center,
+        flingBehavior = snapFlingBehavior
+    ) {
+        item() {
+            Box(
+                modifier = Modifier
+                    .onSizeChanged {
+                        firstItemSize = it
+                    }
+                    .padding(20.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(Icons.Default.ArrowUpward, contentDescription = "up")
+                    Text(text = "Item 0")
+                }
+            }
+        }
+        items(10) {
+            Box(
+                modifier = Modifier
+                    .onSizeChanged {
+                        firstItemSize = it
+                    }
+                    .padding(20.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(Icons.Default.ArrowUpward, contentDescription = "up")
+                    Text(text = "Item ${it + 1}")
+                }
+            }
+        }
+        item() {
+            Box(
+                modifier = Modifier
+                    .onSizeChanged {
+                        lastItemSize = it
+                    }
+                    .padding(20.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(Icons.Default.ArrowUpward, contentDescription = "up")
+                    Text(text = "Item 12")
+                }
+            }
+        }
+    }
+
+
 
 }
