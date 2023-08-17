@@ -4,7 +4,7 @@ import android.graphics.Point
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 
-data class ScanRecord(
+data class ScanImage(
     val id: Long,
     val createAt: Long,
     val updateAt: Long,
@@ -19,7 +19,7 @@ data class ScanRecord(
 )
 
 data class ScanRecordState (
-    val record: ScanRecord,
+    val record: ScanImage,
     val selectionIndex: MutableState<Int?> = mutableStateOf(null),
     val selected: MutableState<Boolean> = mutableStateOf(false),
     val selection: MutableState<Boolean> = mutableStateOf(false),

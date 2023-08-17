@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
@@ -31,24 +30,17 @@ import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MediumTopAppBar
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -355,7 +347,7 @@ fun SelectionPreview() {
 @Composable
 fun ScanRecordPreview() {
 
-    val scan = ScanRecord(
+    val scan = ScanImage(
         id = 0,
         createAt = 0,
         updateAt = 0,
@@ -383,7 +375,7 @@ fun ScanRecordPreview() {
 @Preview
 @Composable
 fun ScanRecordListPreview() {
-    val scan = ScanRecord(
+    val scan = ScanImage(
         id = 0,
         createAt = 0,
         updateAt = 0,
@@ -406,7 +398,7 @@ fun ScanRecordListPreview() {
         records = List(10) {
 
             ScanRecordState(
-                record = ScanRecord(
+                record = ScanImage(
                     id = it.toLong(),
                     createAt = 0,
                     updateAt = 0,
